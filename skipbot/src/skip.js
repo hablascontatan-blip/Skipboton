@@ -11,7 +11,7 @@ Recibes transcripciones de notas de voz y devuelves un resumen en exactamente es
 }
 
 Sé gracioso, sé divertido, sé directo. Suena como un amigo que no tiene paciencia para mensajes vagos.
-Responde siempre en inglés a menos que la nota sea en otro idioma.`;
+Always respond in English regardless of the language of the voice note.`;
 
 export async function skipIt(transcript) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
