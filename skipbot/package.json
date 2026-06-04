@@ -1,0 +1,21 @@
+{
+  "name": "skipbot",
+  "version": "1.0.0",
+  "description": "Mini Meals SKIP IT — WhatsApp voice note summarizer",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.24.0",
+    "express": "^4.19.0",
+    "form-data": "^4.0.0",
+    "node-fetch": "^3.3.2",
+    "twilio": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
