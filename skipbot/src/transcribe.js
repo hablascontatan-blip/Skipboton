@@ -36,7 +36,7 @@ export async function transcribeAudio(mediaUrl) {
   const form = new FormData();
   form.append("file", audioBuffer, { filename: `voice.${ext}`, contentType });
   form.append("model", "whisper-1");
-  form.append("language", "es"); // change to "en" or remove for auto-detect
+  form.append("language", "en"); // change to "en" or remove for auto-detect
 
   const whisperRes = await fetch(
     "https://api.openai.com/v1/audio/transcriptions",
