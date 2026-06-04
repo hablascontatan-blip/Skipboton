@@ -2,17 +2,8 @@ import { transcribeAudio } from "./transcribe.js";
 import { skipIt } from "./skip.js";
 import { sendMessage } from "./twilio.js";
 
-/**
- * Handles an incoming Twilio WhatsApp webhook payload.
- * Twilio sends multipart/form-urlencoded with these key fields:
- *   - From: "whatsapp:+1234567890"
- *   - Body: text of the message (empty for voice notes)
- *   - NumMedia: number of media attachments
- *   - MediaUrl0: URL of the first attachment
- *   - MediaContentType0: MIME type (audio/ogg for WhatsApp voice notes)
- */
 export async function handleIncoming(body) {
-  const from = body.From; // e.g. "whatsapp:+34612345678"
+  const from = body.From;
   const numMedia = parseInt(body.NumMedia || "0", 10);
   const mediaType = body.MediaContentType0 || "";
   const mediaUrl = body.MediaUrl0 || "";
@@ -20,14 +11,14 @@ export async function handleIncoming(body) {
 
   // --- VOICE NOTE ---
   if (numMedia > 0 && mediaType.startsWith("audio/")) {
-    await sendMessage(from, "⏩ Recibido. Skipping…");
+    await sendMessage(from, "⏩ Got it. Skipping…");
     try {
       const transcript = await transcribeAudio(mediaUrl);
       const result = await skipIt(transcript);
       await sendResults(from, result);
     } catch (err) {
       console.error("Error processing voice note:", err);
-      await sendMessage(from, "💀 Algo salió mal skipeando eso. Intenta de nuevo.");
+      await sendMessage(from, "💀 Something went wrong. Try again.");
     }
     return;
   }
@@ -36,12 +27,12 @@ export async function handleIncoming(body) {
   if (!textBody || textBody.match(/^(hola|hi|hello|help|ayuda|start|empezar)$/)) {
     await sendMessage(
       from,
-      `⏩ *Mini Meals SKIP IT*\n\nReenvíame cualquier nota de voz y te devuelvo:\n\n• El punto en una línea\n• 3 bullets para reenviar\n• Una respuesta de 3 segundos\n\nSimplemente reenvía la nota. Nada más.`
+      `⏩ *Mini Meals SKIP IT*\n\nForward me any voice note and I'll send back:\n\n• The point in one line\n• 3 bullets to forward\n• A 3-second reply\n\nJust forward the note. That's it.`
     );
     return;
   }
 
-  // --- TEXT TRANSCRIPT (pasted directly) ---
+  // --- TEXT TRANSCRIPT ---
   if (textBody.length > 30) {
     await sendMessage(from, "⏩ Skipping…");
     try {
@@ -49,32 +40,25 @@ export async function handleIncoming(body) {
       await sendResults(from, result);
     } catch (err) {
       console.error("Error processing text:", err);
-      await sendMessage(from, "💀 No pude procesar eso. Intenta con la nota de voz directamente.");
+      await sendMessage(from, "💀 Couldn't process that. Try sending the voice note directly.");
     }
     return;
   }
 
   // --- FALLBACK ---
-  await sendMessage(from, "Reenvíame una nota de voz y te la skipeo. ⏩");
+  await sendMessage(from, "Forward me a voice note and I'll skip it for you. ⏩");
 }
 
-/**
- * Sends the three result cards as separate WhatsApp messages.
- * Three messages feel more native than one wall of text.
- */
 async function sendResults(to, result) {
-  // Card 1 — The one-liner
-  await sendMessage(to, `⏩ *El punto:*\n\n_${result.oneliner}_`);
+  await sendMessage(to, `⏩ *The point:*\n\n_${result.oneliner}_`);
 
-  // Card 2 — Forwardable breakdown
   await sendMessage(
     to,
-    `📋 *Para reenviar:*\n\n→ *Lo que dijo:* ${result.what_they_said}\n→ *Lo que quiere:* ${result.what_they_want}\n→ *Qué hacer tú:* ${result.what_you_should_do}`
+    `📋 *Forward this:*\n\n→ *What they said:* ${result.what_they_said}\n→ *What they want:* ${result.what_they_want}\n→ *What you should do:* ${result.what_you_should_do}`
   );
 
-  // Card 3 — Spicy reply
   await sendMessage(
     to,
-    `🔥 *Tu respuesta en 3 segundos:*\n\n"${result.reply}"\n\n— _Mini Meals. Unskippable flavor._ 🍔`
+    `🔥 *3-second reply:*\n\n"${result.reply}"\n\n— _Mini Meals. Unskippable flavor._ 🍔`
   );
 }
