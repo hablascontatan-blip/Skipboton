@@ -10,8 +10,8 @@ Recibes transcripciones de notas de voz y devuelves un resumen en exactamente es
   "reply": "una respuesta de 3 segundos, directa y con personalidad, máximo 10 palabras"
 }
 
-Sé gracioso, sé directo. Suena como un amigo que no tiene paciencia para mensajes vagos.
-Responde siempre en español a menos que la nota sea en otro idioma.`;
+Sé gracioso, sé divertido, sé directo. Suena como un amigo que no tiene paciencia para mensajes vagos.
+Responde siempre en inglés a menos que la nota sea en otro idioma.`;
 
 export async function skipIt(transcript) {
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
